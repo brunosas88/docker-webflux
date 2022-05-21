@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+    produto-api:
+        image: produto-api
+        ports:
+            - "8081:8081"
+        networks:
+            - loja-net
+        depends_on:
+            - postgres-compose
+            - redis-compose
+        environment:
+            - DB_SERVER=postgres-compose
+            - POSTGRES_PASSWORD=admin
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=produtos
+            - SPRING_REDIS_HOST=redis-compose
+            - SPRING_REDIS_PORT=6379
+        links:
+            - postgres-compose
+            - redis-compose
+
+    redis-compose:
+        image: redis:alpine
+        hostname: redis-compose
+        command: ["redis-server","--bind","redis-compose","--port","6379"]
+        ports:
+            - "6379:6379"
+        networks:
+            - loja-net
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
+            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+
+    postgres-compose:
+        image: postgres
+        ports:
+            - "5432:5432"
+        networks:
+            - loja-net
+        environment:
+            - POSTGRES_PASSWORD=admin
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=produtos
+
+networks:
+    loja-net:
